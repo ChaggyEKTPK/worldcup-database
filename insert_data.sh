@@ -8,3 +8,11 @@ else
 fi
 
 # Do not change code above this line. Use the PSQL variable above to query your database.
+cat games.csv | tail -n +2 | while IFS=',' read year round winner opponent winner_goals opponent_goals
+do
+  $PSQL "INSERT INTO teams(name) VALUES ('$winner') ON CONFLICT (name) DO NOTHING;"
+  $PSQL "INSERT INTO teams(name) VALUES ('$opponent') ON CONFLICT (name) DO NOTHING;"
+  winner_id=$($PSQL "SELECT team_id FROM teams WHERE name = '$winner'")
+  opponent_id=$($PSQL "SELECT team_id FROM teams WHERE name = '$opponent'")
+  $PSQL "INSERT INTO games(round, year, winner_id, opponent_id, winner_goals, opponent_goals) VALUES ('$round', $year, $winner_id, $opponent_id, $winner_goals, $opponent_goals);"
+done
